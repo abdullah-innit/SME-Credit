@@ -1,0 +1,28 @@
+# facts.yaml – External facts referenced by the app.
+# Every fact must have a `source` and `verified` field.
+# Default verified: false until a team member confirms the source.
+
+sme_credit_gap:
+  statement: "SMEs represent over 90% of businesses in Pakistan but receive less than 8% of bank lending."
+  source: "State Bank of Pakistan SME Finance Review (estimates vary by year)"
+  verified: false
+
+sme_employment:
+  statement: "SMEs employ roughly 80% of the non-agricultural labour force in Pakistan."
+  source: "SMEDA Pakistan overview (approximate)"
+  verified: false
+
+formal_credit_access:
+  statement: "Only about 6-7% of Pakistani SMEs have access to formal credit."
+  source: "World Bank Enterprise Survey / SBP reports"
+  verified: false
+
+loan_processing_time:
+  statement: "Traditional SME loan processing can take 2-8 weeks in Pakistan."
+  source: "Industry anecdotes; not formally benchmarked"
+  verified: false
+
+sdg_alignment:
+  statement: "This project aligns with SDG 8 (Decent Work and Economic Growth) and SDG 9 (Industry, Innovation and Infrastructure)."
+  source: "UN Sustainable Development Goals framework"
+  verified: true

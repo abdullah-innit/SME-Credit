@@ -1,0 +1,33 @@
+# RUN-WINDOWS.txt — How to run SME Credit on Windows
+# ====================================================
+
+Prerequisites:
+  - Python 3.11+  (python --version)
+  - Node.js 18+   (node --version)
+  - npm            (npm --version)
+
+Step 1 — Copy environment file:
+  copy .env.example .env
+
+Step 2 — Setup (installs all dependencies):
+  .\scripts\setup.bat
+
+Step 3 — Run both servers:
+  .\scripts\run-all.bat
+
+  Or run them separately in two terminals:
+    Terminal 1:  .\scripts\run-backend.bat
+    Terminal 2:  .\scripts\run-frontend.bat
+
+Step 4 — Verify:
+  Backend API docs:  http://localhost:8000/docs
+  Frontend:          http://localhost:3000
+  Health check:      http://localhost:8000/api/v1/health
+
+Step 5 — Run tests:
+  .\scripts\test.bat
+
+Troubleshooting:
+  - If "python" is not found, try "py" or ensure Python is in PATH
+  - The app runs fully in OFFLINE_MODE by default (no API keys needed)
+  - All data shown is synthetic — no real customers or bank partnerships
