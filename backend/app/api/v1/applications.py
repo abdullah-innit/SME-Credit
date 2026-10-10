@@ -42,6 +42,8 @@ class DataQuality(BaseModel):
     completeness: float
     transaction_count: int
     known_debt_service: bool
+    statement_quality_score: float | None = None
+    statement_count: int = 0
 
 
 class Assurance(BaseModel):

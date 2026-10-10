@@ -47,3 +47,4 @@ env/
 
 # Generated transaction data
 data/transactions.csv
+backend/.ingest_debug/

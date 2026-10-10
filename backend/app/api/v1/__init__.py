@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from app.api.v1.applications import router as applications_router
 from app.api.v1.counterfactuals import router as counterfactuals_router
+from app.api.v1.documents import router as documents_router
 from app.api.v1.explanations import router as explanations_router
 from app.api.v1.health import router as health_router
 
@@ -12,3 +13,4 @@ v1_router.include_router(health_router)
 v1_router.include_router(applications_router)
 v1_router.include_router(explanations_router)
 v1_router.include_router(counterfactuals_router)
+v1_router.include_router(documents_router)

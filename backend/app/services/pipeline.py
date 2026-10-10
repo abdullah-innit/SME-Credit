@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import asdict
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -13,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import enums
-from app.db.models import Application, AuditLog, Business, Decision, ScoreResult, User
+from app.db.models import Application, AuditLog, Business, Decision, Document, ScoreResult, User
 from app.db.session import SessionLocal
 from app.ml.explain import explain_values
 from app.ml.features import compute_features
@@ -40,7 +42,31 @@ def integrity_hook(application_id: int) -> dict:
     return {"status": "pending", "flags": [], "application_id": application_id}
 
 
-def _data_quality(values: dict[str, float]) -> dict:
+def _documents(session: Session, business_id: int) -> list[Document]:
+    return session.scalars(
+        select(Document).where(Document.business_id == business_id).order_by(Document.id)
+    ).all()
+
+
+def _evidence_fingerprint(app: Application, documents: list[Document]) -> str:
+    payload = {
+        "amount": app.amount_requested_pkr,
+        "tenor": app.tenor_months,
+        "submitted_at": str(app.submitted_at),
+        "documents": [
+            (
+                doc.id,
+                doc.sha256,
+                doc.parse_status.value,
+                (doc.parse_report or {}).get("data_quality_score"),
+            )
+            for doc in documents
+        ],
+    }
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+def _data_quality(values: dict[str, float], documents: list[Document]) -> dict:
     present = [
         values[key]
         for key in (
@@ -51,10 +77,21 @@ def _data_quality(values: dict[str, float]) -> dict:
             "has_debt_service_data",
         )
     ]
+    scores = [
+        float(doc.parse_report["data_quality_score"])
+        for doc in documents
+        if doc.parse_status == enums.ParseStatus.PARSED
+        and isinstance((doc.parse_report or {}).get("data_quality_score"), (int, float))
+    ]
+    statement_score = min(scores) if scores else None
+    base = sum(present) / len(present)
+    completeness = base if statement_score is None else 0.7 * base + 0.3 * statement_score / 100
     return {
-        "completeness": round(sum(present) / len(present), 2),
+        "completeness": round(completeness, 2),
         "transaction_count": int(values["transaction_count"]),
         "known_debt_service": bool(values["has_debt_service_data"]),
+        "statement_quality_score": statement_score,
+        "statement_count": len(scores),
     }
 
 
@@ -72,6 +109,8 @@ def score_application(
         champion, challenger, metadata = _models()
         model_version = metadata["model_version"]
         policy_version = policy["effective_version"]
+        documents = _documents(session, app.business_id)
+        evidence_fingerprint = _evidence_fingerprint(app, documents)
         for log in session.scalars(
             select(AuditLog)
             .where(
@@ -85,6 +124,7 @@ def score_application(
             if (
                 stored.get("model_version") == model_version
                 and stored.get("policy_version") == policy_version
+                and stored.get("evidence_fingerprint") == evidence_fingerprint
             ):
                 return {**stored["response"], "idempotent_replay": True}
         snapshot = compute_features(application_id, session)
@@ -183,7 +223,7 @@ def score_application(
             "model_agreement": abs(pd - challenger_pd)
             <= policy["maximum_champion_challenger_pd_gap"],
             "pd_gap": round(abs(pd - challenger_pd), 4),
-            "data_quality": _data_quality(values),
+            "data_quality": _data_quality(values, documents),
             "policy_summary": {
                 state: sum(c["status"] == state for c in checks)
                 for state in ("pass", "fail", "warn")
@@ -223,6 +263,7 @@ def score_application(
                 after={
                     "model_version": model_version,
                     "policy_version": policy_version,
+                    "evidence_fingerprint": evidence_fingerprint,
                     "response": response,
                 },
                 at=datetime.now(UTC),

@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "gpt-4o-mini"
     OFFLINE_MODE: bool = True  # Default True so app works without API keys
 
+    # ── Statement ingestion ─
+    MAX_STATEMENT_BYTES: int = 10_000_000
+    INGEST_DEBUG_KEEP_RAW: bool = False
+
     # ── Database ─────────────────────────────────────────────────────
     DATABASE_URL: str = "sqlite:///./sme_credit.db"
 

@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased] — 2026-10-10
 
+### Added — Statement ingestion and transaction categorisation (2026-10-10)
+- Added CSV, XLSX and text-PDF adapters, validated generic column mapping, optional Prompt 10 LLM hooks, privacy-safe normalisation, rule-first category confidence and duplicate detection.
+- Added upload, status and synthetic sample endpoints with a 10 MB allow-list and stage reports.
+- Added running-balance, coverage, gap and outlier checks; statement quality now enters scoring assurance and evidence changes trigger a refreshed score.
+- Verified all six sample statements, corrupted-file reporting and edited-balance detection in parser and API tests.
 ### Added — Path to Approval counterfactuals (2026-10-10)
 - Added bounded, actionability-checked plans with consistent derived features, real model and policy verification, bilingual steps, timelines and persisted results.
 - Added fast what-if and lender-view API responses with before/after reasons and policy checks.

@@ -1,0 +1,11 @@
+# Statement ingestion
+
+Upload a CSV, XLSX or text-based PDF to `POST /api/v1/applications/{id}/documents` as multipart field `file`. The limit defaults to 10 MB. `GET /api/v1/applications/{id}/documents/{document_id}` reports the parse, categorise, validate and feature stages with a parse report. For the three synthetic personas, `POST /api/v1/applications/{id}/documents/use-sample?format=csv` (or `pdf`) loads the matching sample.
+
+The parser registry recognises separate inflow/outflow, debit/credit and signed-amount layouts. A generic mapper handles common header variants. Unknown headers can be proposed by the Prompt 10 LLM hook as JSON; the proposal must pass strict field/header validation. Offline mode uses deterministic heuristics. Ambiguous transaction descriptions alone are sent to the optional LLM category hook in batches of 25, with a cache. Each category decision stores its source and confidence. The current LLM provider module is not yet implemented, so online calls fall back safely to rules until Prompt 10 supplies it.
+
+Dates, whole-PKR amounts, directions and channels are normalised. Counterparties are stored as SHA-256 hashes; account and IBAN patterns are masked before any LLM call. The database filename is a content-hash label rather than the submitted name. The upload is processed in memory and the raw file is never retained by default. `INGEST_DEBUG_KEEP_RAW=true` permits local debug retention in ignored `backend/.ingest_debug/` only when explicitly enabled.
+
+The report checks adjacent running balances, missing calendar months, coverage, amount outliers, invalid rows and duplicates. Its 0–100 quality score enters the scoring assurance block, and a new document changes the evidence fingerprint so the next scoring request refreshes the result. This score is a statement-quality signal; it is not an independently validated risk estimate. The upload route processes synchronously, but saves the four stage states for status inspection. An image-only PDF needs OCR, which is outside this prompt.
+
+All six synthetic files in `samples/` parse and reconcile. Ayesha and Karim samples score 100 for statement quality; FastFix scores 90 because its injected amount outliers are reported. Corrupt files are recorded as `failed` with a safe error message and no raw account information.
