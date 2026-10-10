@@ -1,0 +1,53 @@
+# RUN-WINDOWS.txt — How to run SME Credit on Windows
+# ====================================================
+
+Prerequisites:
+  - Python 3.11+  (python --version)
+  - Node.js 20.9+   (node --version)
+  - npm            (npm --version)
+
+Step 1 — Copy environment file:
+  copy .env.example .env
+
+Step 2 — Setup (installs all dependencies):
+  .\scripts\setup.bat
+
+Step 3 — Run both servers:
+  .\scripts\run-all.bat
+
+  Or run them separately in two terminals:
+    Terminal 1:  .\scripts\run-backend.bat
+    Terminal 2:  .\scripts\run-frontend.bat
+
+Step 4 — Verify:
+  Backend API docs:  http://localhost:8000/docs
+  Frontend:          http://localhost:3000
+  Health check:      http://localhost:8000/api/v1/health
+
+Step 5 — Run tests:
+  .\scripts\test.bat
+
+Troubleshooting:
+  - If "python" is not found, try "py" or ensure Python is in PATH
+  - The app runs fully in OFFLINE_MODE by default (no API keys needed)
+  - All data shown is synthetic — no real customers or bank partnerships
+
+SME-Credit2.0 fixes:
+  Extract into a NEW folder; do not merge it into the old project. This avoids
+  retaining local duplicate tests and conflicting enum definitions.
+  Open the extracted SME-Credit2.0 folder in VS Code.
+  First setup from project root:
+    .\scripts\setup.bat
+  Tests from backend:
+    .\venv\Scripts\python.exe -m pytest -q
+  Start both services from project root:
+    .\scripts\run-all.bat
+
+  If intentionally keeping an existing SQLite database, stop the backend first,
+  then run from backend before starting or seeding:
+    .\venv\Scripts\python.exe -m app.db.migrate_synthetic
+  This adds the missing synthetic flag without deleting data; it is not a
+  general migration tool and does not rewrite unrelated legacy schemas.
+
+  Node.js must be at least 20.9 for the bundled Next.js dependency.
+  In PowerShell use npm.cmd instead of npm if execution policy blocks npm.ps1.
