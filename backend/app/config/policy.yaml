@@ -1,0 +1,32 @@
+# Demonstration policy only; values and rates are illustrative, not lending terms.
+version: "1.0.0"
+minimum_vintage_months: 6
+excluded_sectors:
+  - gambling
+  - weapons
+dscr_floor: 1.2
+maximum_instalment_to_inflow: 0.15
+maximum_champion_challenger_pd_gap: 0.20
+lgd: 0.45
+minimum_recommended_amount_pkr: 50000
+tier_limits:
+  A:
+    maximum_exposure_pkr: 1500000
+    maximum_tenor_months: 24
+    indicative_rate_band: "Illustrative 14–18% annual"
+  B:
+    maximum_exposure_pkr: 1200000
+    maximum_tenor_months: 24
+    indicative_rate_band: "Illustrative 18–22% annual"
+  C:
+    maximum_exposure_pkr: 900000
+    maximum_tenor_months: 18
+    indicative_rate_band: "Illustrative 22–26% annual"
+  D:
+    maximum_exposure_pkr: 600000
+    maximum_tenor_months: 12
+    indicative_rate_band: "Illustrative 26–30% annual"
+  E:
+    maximum_exposure_pkr: 300000
+    maximum_tenor_months: 12
+    indicative_rate_band: "Illustrative 30–34% annual"

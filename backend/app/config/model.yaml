@@ -1,0 +1,22 @@
+# Model policy configuration. These are demo policy choices, not external facts.
+model_version: "1.0.0"
+random_seed: 42
+split:
+  train: 0.60
+  validation: 0.20
+  test: 0.20
+scorecard:
+  base_score: 600
+  base_good_to_bad_odds: 50
+  points_to_double_odds: 20
+  min_score: 300
+  max_score: 900
+  tier_pd_upper:
+    A: 0.02
+    B: 0.05
+    C: 0.10
+    D: 0.20
+    E: 1.0
+baseline:
+  min_bureau_history_months: 24
+  min_collateral_coverage: 1.5

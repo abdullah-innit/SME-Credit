@@ -34,8 +34,7 @@ desktop.ini
 .next/
 out/
 
-# ML artifacts (large files)
-backend/app/ml/artifacts/*.joblib
+# Trained demo model artifacts are versioned with metadata
 backend/app/ml/artifacts/*.pkl
 
 # Logs

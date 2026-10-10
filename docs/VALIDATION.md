@@ -1,55 +1,38 @@
-# Validation Plan
+# Synthetic model validation
 
-> Placeholder — will be populated as features are built.
+Generated: 2026-10-10T06:57:41.691371+00:00 UTC. Data SHA-256: `2abcf7bb74c0f7a29dc214660cea5b2db0919e3334333d24828ea7e16068abc2`.
+This is a demonstration on synthetic businesses and synthetic defaults, not a claim of real-world performance.
 
-## Test Strategy
+## Split and selection
 
-- **Unit tests:** pytest in `backend/tests/`
-- **API tests:** FastAPI TestClient
-- **Frontend tests:** to be configured
-- **Linting:** ruff (backend), ESLint (frontend)
+Business-disjoint stratified split with seed 42: train 1800, validation 600, test 600. Standardization is fit on train only. Both estimators are fit on train only. Platt and isotonic calibrators are fit on validation; validation Brier chooses each calibrator. Logistic regression is the prespecified champion; the boosting model is a challenger. The test set is evaluated once after selection. Validation Brier is optimistic because it also selects the calibrator.
 
-## Holdout Evaluation
+Champion: **logistic**. Champion validation Brier: 0.081.
 
-_To be documented when the ML model and holdout set are ready._
+| Model | Test segment | N | Defaults | ROC-AUC | PR-AUC | KS | Brier |
+|---|---|---:|---:|---:|---:|---:|---:|
+| logistic | all | 600 | 63 | 0.785 | 0.301 | 0.439 | 0.081 |
+| logistic | thin_file | 212 | 22 | 0.775 | 0.239 | 0.472 | 0.086 |
+| logistic | thick_file | 388 | 41 | 0.791 | 0.332 | 0.483 | 0.078 |
+| hist_gradient_boosting | all | 600 | 63 | 0.741 | 0.258 | 0.352 | 0.087 |
+| hist_gradient_boosting | thin_file | 212 | 22 | 0.683 | 0.213 | 0.255 | 0.093 |
+| hist_gradient_boosting | thick_file | 388 | 41 | 0.770 | 0.303 | 0.415 | 0.084 |
 
-## Fairness Audit
+## Champion calibration by risk decile
 
-_To be documented when the fairness module is implemented._
+| Risk decile | N | Mean predicted PD | Observed default rate | Lift |
+|---:|---:|---:|---:|---:|
+| 1 | 60 | 0.376 | 0.350 | 3.333 |
+| 2 | 60 | 0.263 | 0.233 | 2.222 |
+| 3 | 60 | 0.109 | 0.150 | 1.429 |
+| 4 | 60 | 0.079 | 0.083 | 0.794 |
+| 5 | 60 | 0.068 | 0.067 | 0.635 |
+| 6 | 60 | 0.068 | 0.033 | 0.317 |
+| 7 | 60 | 0.067 | 0.067 | 0.635 |
+| 8 | 60 | 0.025 | 0.017 | 0.159 |
+| 9 | 60 | 0.018 | 0.033 | 0.317 |
+| 10 | 60 | 0.002 | 0.017 | 0.159 |
 
+## Traditional-rule baseline on the same test businesses
 
-## Relational contract verification (2026-10-09)
-
-After dependency setup, from `backend` in PowerShell (under two minutes):
-
-```powershell
-.\venv\Scripts\python.exe -m pytest -q
-.\venv\Scripts\python.exe -m ruff check app tests
-.\venv\Scripts\python.exe -m app.db.seed
-```
-
-Expected: 19 tests pass; lint passes; the seed prints a success message.
-The seed is synthetic and idempotent. Servers retain their existing commands.
-
-Later modules import ORM records from `app.db.models`, create/read contracts
-from `app.schemas.records`, and all enum values from `app.enums`.
-Use `get_db` for FastAPI routes, `session_scope` for committed work, and
-`init_db(seed_hook=...)` for an explicit bootstrap callback. Do not auto-seed production.
-Assign new JSON dictionaries/lists when changing evidence; nested in-place changes
-are not tracked. UTC timestamps are naive when read from SQLite.
-
-Authorization and same-business evidence/consent checks belong in later service
-modules; FK integrity alone does not establish ownership. Free-text content and
-uploaded filenames must be sanitized before persistence. Hash counterparty IDs
-upstream; do not store their original values. Append-only ORM guards cannot stop
-privileged raw SQL changes. Existing databases require migrations, not create_all.
-
-
-## SME-Credit2.0 compatibility
-
-Business.is_synthetic is persisted and returned in schemas (default true for demo).
-AgeBand and OwnerAgeBand refer to one enum; AGE_35_44 and BAND_35_44 are aliases.
-Legacy input 35-44 is normalized to stored value 35_44. Unknown values remain invalid.
-The ERD includes is_synthetic and is tested against exact mapped columns and links.
-Use a fresh extraction to avoid local duplicate tests. For an existing SQLite DB,
-run `python -m app.db.migrate_synthetic` before seeding or starting services.
+Requires at least 24 bureau-history months and collateral coverage at least 1.5×. Approval rate: 0.345; observed default rate among approved: 0.130 (207 approved). These are policy outcomes, not model discrimination metrics.

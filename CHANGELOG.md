@@ -5,6 +5,42 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased] — 2026-10-10
 
+### Added — Scoring pipeline and policy decision API (2026-10-10)
+- Added application submission, idempotent scoring, versioned and reloadable policy checks, recommended offers, expected loss and bank assurance responses.
+- Persisted score, system recommendation and audit records; exposed stable failure codes and documented synthetic-data and integrity-hook limits in docs/POLICY.md.
+- Added persona, policy edit and warm-route regression tests.
+### Added — Explainability and adverse-action reasons
+- Added reconciled local raw-log-odds waterfalls for the logistic champion and deterministic permutation fallback for the boosting challenger when SHAP is unavailable.
+- Added bilingual reason templates for all 30 model features, global importance metadata, tiny-noise stability checks, and rule-based notices for declined or referred decisions.
+- Application scoring and the new GET /api/v1/applications/{id}/explanation endpoint persist bilingual reasons in ScoreResult.
+- Added template, reconciliation, persona, stability, notice, and endpoint persistence tests; documented interpretation in docs/EXPLAINABILITY.md.
+
+
+
+### Added — Model training and scorecard
+- Added business-disjoint stratified 60/20/20 training, validation, and test splits with a fixed seed.
+- Trained a regularised logistic champion and histogram gradient boosting challenger; selected Platt or isotonic calibration using validation Brier.
+- Added version-checked joblib artifacts, metadata with feature and data hashes, a configurable 300–900 scorecard with A–E PD tiers, and a traditional bureau/collateral baseline.
+- Generated synthetic-only validation and model-card reports, including thin-file and thick-file holdout results.
+- Added split, monotonic-risk, loader, score scaling, and scoring-latency tests.
+
+### Validation — Model training
+- Logistic champion on 600 untouched test businesses: ROC-AUC 0.785, PR-AUC 0.301, KS 0.439, Brier 0.081.
+- Challenger test ROC-AUC 0.741. Training completed in under a minute on the development machine.
+
+
+
+### Added — Feature engineering
+- Added 30 point-in-time model features, a validated English/Urdu actionability registry, and versioned persisted feature snapshots.
+- Added pure scenario recomputation for amount, tenor, balance, digital share, and known debt service; protected attributes stay outside model features.
+- Documented imputation and the existing-debt-service data gap in docs/FEATURES.md.
+- Added hand-calculated, no-look-ahead, missingness, registry, and snapshot persistence tests.
+
+### Validation — Feature engineering
+- 3,000 synthetic applications computed and flushed in 27.9 seconds in a rollback-only benchmark.
+
+
+
 ### Added
 - `backend/app/ml/synth.py` deterministic synthetic SME generator CLI (`python -m app.ml.synth --n 3000 --seed 42`).
 - Generated 3,000 synthetic SMEs across 8 sectors, Pakistani cities, and legal forms with realistic distributions (~20% women-led, ~35% thin-file, ~60% NTN-registered).

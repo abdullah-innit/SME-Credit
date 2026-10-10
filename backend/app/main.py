@@ -10,12 +10,17 @@ from app.api.v1 import v1_router
 from app.core.config import settings
 from app.core.logging import logger
 from app.db.session import init_db
+from app.services.pipeline import warm_models
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan: runs on startup and shutdown."""
     init_db()
+    try:
+        warm_models()
+    except (FileNotFoundError, ValueError) as exc:
+        logger.warning("Scoring artifacts unavailable: %s", exc)
     logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
     logger.info("Offline mode: %s", settings.OFFLINE_MODE)
     logger.info("CORS origin: %s", settings.FRONTEND_ORIGIN)
