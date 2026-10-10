@@ -9,11 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1 import v1_router
 from app.core.config import settings
 from app.core.logging import logger
+from app.db.session import init_db
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan: runs on startup and shutdown."""
+    init_db()
     logger.info("Starting %s v%s", settings.APP_NAME, settings.APP_VERSION)
     logger.info("Offline mode: %s", settings.OFFLINE_MODE)
     logger.info("CORS origin: %s", settings.FRONTEND_ORIGIN)
