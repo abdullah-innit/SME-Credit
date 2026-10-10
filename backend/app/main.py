@@ -36,22 +36,28 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
-    init_db()
-    try:
-        warm_models()
-    except (FileNotFoundError, ValueError) as exc:
-        logger.warning("Scoring artifacts unavailable: %s", exc)
+try:
+    if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
+        init_db()
+        try:
+            warm_models()
+        except (FileNotFoundError, ValueError) as exc:
+            logger.warning("Scoring artifacts unavailable: %s", exc)
 
+    # ── CORS ─────────────────────────────────────────────────────────────
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.FRONTEND_ORIGIN],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-# ── CORS ─────────────────────────────────────────────────────────────
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.FRONTEND_ORIGIN],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ── Routers ──────────────────────────────────────────────────────────
-app.include_router(v1_router)
+    # ── Routers ──────────────────────────────────────────────────────────
+    app.include_router(v1_router)
+except Exception as e:
+    import traceback
+    err_msg = traceback.format_exc()
+    @app.get("/api/v1/health")
+    def health_error():
+        return {"status": "error", "error": err_msg}
