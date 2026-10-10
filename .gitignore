@@ -45,3 +45,6 @@ backend/app/ml/artifacts/*.pkl
 venv/
 .venv/
 env/
+
+# Generated transaction data
+data/transactions.csv

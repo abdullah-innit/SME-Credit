@@ -12,11 +12,10 @@ from __future__ import annotations
 
 import argparse
 import csv
-from datetime import UTC, date, datetime, timedelta
 import hashlib
-from pathlib import Path
 import sqlite3
-import sys
+from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -495,10 +494,12 @@ class SyntheticDataGenerator:
             )"""
         )
         conn.execute(
-            "CREATE INDEX IF NOT EXISTS ix_loan_evaluations_business_id ON loan_evaluations (business_id)"
+            "CREATE INDEX IF NOT EXISTS ix_loan_evaluations_business_id "
+            "ON loan_evaluations (business_id)"
         )
         conn.execute(
-            "CREATE INDEX IF NOT EXISTS ix_loan_evaluations_application_id ON loan_evaluations (application_id)"
+            "CREATE INDEX IF NOT EXISTS ix_loan_evaluations_application_id "
+            "ON loan_evaluations (application_id)"
         )
 
         now_iso = datetime.now(UTC).isoformat().replace("+00:00", "Z")
@@ -639,7 +640,10 @@ class SyntheticDataGenerator:
 
             parse_rep = '{"status": "parsed", "account_type": "current", "reconciled": true}'
             if pop["fraud_patterns"][i] == "tampered_balances":
-                parse_rep = '{"status": "parsed", "account_type": "current", "balance_discrepancy_pkr": 950000}'
+                parse_rep = (
+                    '{"status": "parsed", "account_type": "current", '
+                    '"balance_discrepancy_pkr": 950000}'
+                )
 
             docs_rows.append(
                 (
@@ -821,7 +825,7 @@ class SyntheticDataGenerator:
             print("Generating 24 months of daily transactions with reconciled balances...")
 
         txn_csv_path = data_p / "transactions.csv"
-        txn_csv_file = open(txn_csv_path, "w", newline="", encoding="utf-8")
+        txn_csv_file = open(txn_csv_path, "w", newline="", encoding="utf-8")  # noqa: SIM115
         txn_writer = csv.writer(txn_csv_file)
         txn_writer.writerow(
             [
@@ -837,13 +841,6 @@ class SyntheticDataGenerator:
             ]
         )
 
-        channels = [
-            enums.Channel.BANK,
-            enums.Channel.WALLET,
-            enums.Channel.CASH_DEPOSIT,
-            enums.Channel.INSTANT_TRANSFER,
-        ]
-
         # Inflow categories
         inflow_cats = [
             "customer_payment",
@@ -851,14 +848,6 @@ class SyntheticDataGenerator:
             "invoice_settlement",
             "pos_settlement",
             "digital_transfer_in",
-        ]
-        # Outflow categories
-        outflow_cats = [
-            "supplier_payment",
-            "payroll",
-            "utility_bill",
-            "rent",
-            "operational_expense",
         ]
 
         txn_id = 1
@@ -916,7 +905,7 @@ class SyntheticDataGenerator:
                     is_month_end = cur_date.day in (28, 29, 30, 31, 1)
                     is_mid_month = cur_date.day in (15, 16)
 
-                    # Determine daily transactions (1 primary transaction per day + periodic bills/payroll)
+                    # Determine daily txns (1 primary txn per day + periodic bills/payroll)
                     # Outflow vs Inflow determination:
                     # Inflows happen on most sales days (~70% of days)
                     # Outflows happen on payroll, supplier replenishment days
@@ -956,7 +945,8 @@ class SyntheticDataGenerator:
                     else:
                         is_outflow = False
                         category = inflow_cats[(day_idx + biz_id) % len(inflow_cats)]
-                        weekend_boost = 1.3 if (is_weekend and sector in ("retail", "food and beverage")) else 1.0
+                        is_retail_fb = sector in ("retail", "food and beverage")
+                        weekend_boost = 1.3 if (is_weekend and is_retail_fb) else 1.0
                         amount = int(
                             max(
                                 2000,
@@ -995,9 +985,14 @@ class SyntheticDataGenerator:
                     if is_outflow:
                         if amount >= cur_balance:
                             # Constrain outflow to keep balance positive
-                            amount = max(1000, int(cur_balance * 0.7))
-                        direction = enums.Direction.OUTFLOW
-                        new_balance = cur_balance - amount
+                            amount = int(cur_balance * 0.7)
+                        if amount == 0:
+                            direction = enums.Direction.INFLOW
+                            amount = int(base_daily * 0.5)
+                            new_balance = cur_balance + amount
+                        else:
+                            direction = enums.Direction.OUTFLOW
+                            new_balance = cur_balance - amount
                     else:
                         direction = enums.Direction.INFLOW
                         new_balance = cur_balance + amount
@@ -1240,10 +1235,12 @@ class SyntheticDataGenerator:
         print(f"Total Daily Transactions:      {total_txns:,}")
         print(f"Balance Reconciliation Rate:   {recon_pct:.1f}%")
         print("-------------------------------------------------------")
-        print("Demo Personas Established:")
-        print(f"  [ID 1] {PERSONA_1_AYESHA['name']:<22} Thin-file: YES | Women-led: YES | Default: NO")
-        print(f"  [ID 2] {PERSONA_2_KARIM['name']:<22} Thin-file: NO  | Borderline: YES | Default: NO")
-        print(f"  [ID 3] {PERSONA_3_FASTFIX['name']:<22} Window Dressing Fraud: YES    | Default: YES")
+        n1 = PERSONA_1_AYESHA["name"]
+        n2 = PERSONA_2_KARIM["name"]
+        n3 = PERSONA_3_FASTFIX["name"]
+        print(f"  [ID 1] {n1:<20} Thin-file: YES | Women-led: YES | Default: NO")
+        print(f"  [ID 2] {n2:<20} Thin-file: NO  | Borderline: YES | Default: NO")
+        print(f"  [ID 3] {n3:<20} Window Dressing Fraud: YES   | Default: YES")
         print("-------------------------------------------------------")
         print(f"Database Output:  {db_p}")
         print(f"CSV Output:       {data_p}")
@@ -1333,35 +1330,43 @@ class SyntheticDataGenerator:
     ) -> None:
         """Construct valid text-based PDF 1.4 statement with no external dependencies."""
         lines = [
-            f"================================================================================",
+            "================================================================================",
             f"  {bank_name.upper()}",
-            f"  OFFICIAL STATEMENT OF ACCOUNT — SYNTHETIC CASH FLOW AUDIT",
-            f"================================================================================",
+            "  OFFICIAL STATEMENT OF ACCOUNT — SYNTHETIC CASH FLOW AUDIT",
+            "================================================================================",
             f"Account Title:   {account_title}",
             f"IBAN:            {iban}",
-            f"Currency:        PKR (Pakistani Rupee)",
-            f"Statement Span:  2024-10-01 to 2026-09-30 (Recent transactions shown below)",
-            f"Notice:          100% Synthetic Data generated for AI credit scrutiny demo.",
-            f"--------------------------------------------------------------------------------",
-            f"DATE        | CHANNEL         | CATEGORY            | INFLOW      | OUTFLOW     | BALANCE",
-            f"--------------------------------------------------------------------------------",
+            "Currency:        PKR (Pakistani Rupee)",
+            "Statement Span:  2024-10-01 to 2026-09-30 (Recent transactions shown below)",
+            "Notice:          100% Synthetic Data generated for AI credit scrutiny demo.",
+            "--------------------------------------------------------------------------------",
+            "DATE        | CHANNEL       | CATEGORY          | INFLOW     | OUTFLOW    | BALANCE",
+            "--------------------------------------------------------------------------------",
         ]
 
         for t in txns:
             d_str = t["date"]
             ch_str = f"{t['channel'][:13]:<13}"
             cat_str = f"{t['category'][:17]:<17}"
-            inflow = f"{t['amount_pkr']:>10,}" if t["direction"] == enums.Direction.INFLOW else "         0"
-            outflow = f"{t['amount_pkr']:>10,}" if t["direction"] == enums.Direction.OUTFLOW else "         0"
+            inflow = (
+                f"{t['amount_pkr']:>10,}"
+                if t["direction"] == enums.Direction.INFLOW
+                else "         0"
+            )
+            outflow = (
+                f"{t['amount_pkr']:>10,}"
+                if t["direction"] == enums.Direction.OUTFLOW
+                else "         0"
+            )
             bal = f"{t['balance_pkr']:>10,}"
             lines.append(f"{d_str}  | {ch_str} | {cat_str} | {inflow} | {outflow} | {bal}")
 
         lines.extend(
             [
-                f"--------------------------------------------------------------------------------",
+                "--------------------------------------------------------------------------------",
                 f"Closing Balance PKR: {txns[-1]['balance_pkr']:,}",
-                f"End of Statement — All running balances mathematically reconciled.",
-                f"================================================================================",
+                "End of Statement — All running balances mathematically reconciled.",
+                "================================================================================",
             ]
         )
 
@@ -1372,9 +1377,9 @@ class SyntheticDataGenerator:
             "40 760 Td",
             "12 TL",
         ]
-        for l in lines:
+        for line_item in lines:
             escaped = (
-                l.replace("\\", "\\\\")
+                line_item.replace("\\", "\\\\")
                 .replace("(", "\\(")
                 .replace(")", "\\)")
             )
@@ -1432,7 +1437,10 @@ class SyntheticDataGenerator:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate synthetic Pakistani SME credit dataset with latent health, transactions, and personas."
+        description=(
+            "Generate synthetic Pakistani SME credit dataset with latent health, "
+            "transactions, and personas."
+        )
     )
     parser.add_argument(
         "--n",

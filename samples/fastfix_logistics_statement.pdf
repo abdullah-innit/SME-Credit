@@ -1,0 +1,158 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+5 0 obj
+<< /Length 5462 >>
+stream
+BT
+/F1 9 Tf
+40 760 Td
+12 TL
+(================================================================================) Tj
+T*
+(  BANK ALFALAH LIMITED) Tj
+T*
+(  OFFICIAL STATEMENT OF ACCOUNT ? SYNTHETIC CASH FLOW AUDIT) Tj
+T*
+(================================================================================) Tj
+T*
+(Account Title:   FastFix Logistics) Tj
+T*
+(IBAN:            PK12ALFH0003948572610303) Tj
+T*
+(Currency:        PKR \(Pakistani Rupee\)) Tj
+T*
+(Statement Span:  2024-10-01 to 2026-09-30 \(Recent transactions shown below\)) Tj
+T*
+(Notice:          100% Synthetic Data generated for AI credit scrutiny demo.) Tj
+T*
+(--------------------------------------------------------------------------------) Tj
+T*
+(DATE        | CHANNEL         | CATEGORY            | INFLOW      | OUTFLOW     | BALANCE) Tj
+T*
+(--------------------------------------------------------------------------------) Tj
+T*
+(2026-08-17  | cash_deposit  | pos_settlement    |     48,070 |          0 |  5,773,614) Tj
+T*
+(2026-08-18  | cash_deposit  | digital_transfer_ |     46,660 |          0 |  5,820,274) Tj
+T*
+(2026-08-19  | bank          | customer_payment  |     46,587 |          0 |  5,866,861) Tj
+T*
+(2026-08-20  | bank          | supplier_payment  |          0 |    102,600 |  5,764,261) Tj
+T*
+(2026-08-21  | cash_deposit  | invoice_settlemen |     55,259 |          0 |  5,819,520) Tj
+T*
+(2026-08-22  | instant_trans | digital_transfer_ |  1,500,000 |          0 |  7,319,520) Tj
+T*
+(2026-08-23  | cash_deposit  | digital_transfer_ |     46,550 |          0 |  7,366,070) Tj
+T*
+(2026-08-24  | bank          | operational_expen |          0 |  1,440,000 |  5,926,070) Tj
+T*
+(2026-08-25  | instant_trans | sales_deposit     |     63,870 |          0 |  5,989,940) Tj
+T*
+(2026-08-26  | cash_deposit  | invoice_settlemen |     63,114 |          0 |  6,053,054) Tj
+T*
+(2026-08-27  | instant_trans | pos_settlement    |     46,502 |          0 |  6,099,556) Tj
+T*
+(2026-08-28  | bank          | payroll           |          0 |    137,500 |  5,962,056) Tj
+T*
+(2026-08-29  | instant_trans | customer_payment  |     46,072 |          0 |  6,008,128) Tj
+T*
+(2026-08-30  | bank          | payroll           |          0 |    137,500 |  5,870,628) Tj
+T*
+(2026-08-31  | instant_trans | invoice_settlemen |     64,770 |          0 |  5,935,398) Tj
+T*
+(2026-09-01  | bank          | payroll           |          0 |    137,500 |  5,797,898) Tj
+T*
+(2026-09-02  | cash_deposit  | digital_transfer_ |     61,520 |          0 |  5,859,418) Tj
+T*
+(2026-09-03  | cash_deposit  | customer_payment  |     57,360 |          0 |  5,916,778) Tj
+T*
+(2026-09-04  | cash_deposit  | sales_deposit     |     68,044 |          0 |  5,984,822) Tj
+T*
+(2026-09-05  | bank          | supplier_payment  |          0 |    102,600 |  5,882,222) Tj
+T*
+(2026-09-06  | instant_trans | digital_transfer_ |  1,500,000 |          0 |  7,382,222) Tj
+T*
+(2026-09-07  | cash_deposit  | digital_transfer_ |     58,652 |          0 |  7,440,874) Tj
+T*
+(2026-09-08  | bank          | operational_expen |          0 |  1,440,000 |  6,000,874) Tj
+T*
+(2026-09-09  | bank          | supplier_payment  |          0 |    102,600 |  5,898,274) Tj
+T*
+(2026-09-10  | wallet        | invoice_settlemen |     67,533 |          0 |  5,965,807) Tj
+T*
+(2026-09-11  | instant_trans | pos_settlement    |     59,972 |          0 |  6,025,779) Tj
+T*
+(2026-09-12  | bank          | digital_transfer_ |     46,247 |          0 |  6,072,026) Tj
+T*
+(2026-09-13  | bank          | supplier_payment  |          0 |    102,600 |  5,969,426) Tj
+T*
+(2026-09-14  | cash_deposit  | sales_deposit     |     58,419 |          0 |  6,027,845) Tj
+T*
+(2026-09-15  | cash_deposit  | invoice_settlemen |     50,403 |          0 |  6,078,248) Tj
+T*
+(2026-09-16  | instant_trans | utility_bill      |          0 |     89,000 |  5,989,248) Tj
+T*
+(2026-09-17  | bank          | supplier_payment  |          0 |    102,600 |  5,886,648) Tj
+T*
+(2026-09-18  | cash_deposit  | customer_payment  |     62,305 |          0 |  5,948,953) Tj
+T*
+(2026-09-19  | cash_deposit  | sales_deposit     |     56,418 |          0 |  6,005,371) Tj
+T*
+(2026-09-20  | cash_deposit  | invoice_settlemen |     46,309 |          0 |  6,051,680) Tj
+T*
+(2026-09-21  | instant_trans | digital_transfer_ |  1,500,000 |          0 |  7,551,680) Tj
+T*
+(2026-09-22  | cash_deposit  | digital_transfer_ |     46,953 |          0 |  7,598,633) Tj
+T*
+(2026-09-23  | bank          | operational_expen |          0 |  1,440,000 |  6,158,633) Tj
+T*
+(2026-09-24  | cash_deposit  | sales_deposit     |     51,557 |          0 |  6,210,190) Tj
+T*
+(2026-09-25  | bank          | supplier_payment  |          0 |    102,600 |  6,107,590) Tj
+T*
+(2026-09-26  | wallet        | pos_settlement    |     59,529 |          0 |  6,167,119) Tj
+T*
+(2026-09-27  | cash_deposit  | digital_transfer_ |     63,822 |          0 |  6,230,941) Tj
+T*
+(2026-09-28  | cash_deposit  | customer_payment  |     65,241 |          0 |  6,296,182) Tj
+T*
+(2026-09-29  | bank          | payroll           |          0 |    137,500 |  6,158,682) Tj
+T*
+(2026-09-30  | cash_deposit  | invoice_settlemen |     52,651 |          0 |  6,211,333) Tj
+T*
+(--------------------------------------------------------------------------------) Tj
+T*
+(Closing Balance PKR: 6,211,333) Tj
+T*
+(End of Statement ? All running balances mathematically reconciled.) Tj
+T*
+(================================================================================) Tj
+T*
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000309 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+5823
+%%EOF

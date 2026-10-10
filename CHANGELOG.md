@@ -3,7 +3,29 @@
 All notable changes to SME Credit are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [SME-Credit2.0] — 2026-10-09
+## [Unreleased] — 2026-10-10
+
+### Added
+- `backend/app/ml/synth.py` deterministic synthetic SME generator CLI (`python -m app.ml.synth --n 3000 --seed 42`).
+- Generated 3,000 synthetic SMEs across 8 sectors, Pakistani cities, and legal forms with realistic distributions (~20% women-led, ~35% thin-file, ~60% NTN-registered).
+- Latent business-health variable driving revenues, seasonality, volatility, utility-bill punctuality, and digital-channel adoption.
+- 24 months of daily transactions per SME with strict running balance mathematical reconciliation (`inflow - outflow = balance_after`).
+- Realistic fraud pattern injection (~3.5%): round-trip circular flows, window-dressing spikes prior to application, tampered statements with arithmetic discrepancies.
+- Three canonical demo personas established:
+  1. Ayesha Malik (Ayesha's Boutique, Karachi) — thin-file, women-led artisan apparel with strong digital wallet cash-flow.
+  2. Karim Traders (Lahore) — thick bureau file, hardware retail with seasonal dips, borderline cash-flow suitable for Path to Approval.
+  3. FastFix Logistics (Rawalpindi) — window-dressing fraud pattern, flagged by integrity scrutiny.
+- Demo persona statement artifacts: CSV and valid text-based PDF statements in `samples/`.
+- Holdout evaluation isolation (`loan_evaluations` table) preventing target leakage into feature pipelines.
+- Sanity tests in `backend/tests/test_synth.py` validating population statistics and zero target label leakage.
+- Detailed documentation of schema, data dictionary, and generation assumptions in `docs/MODEL-DATA-GUIDE.md`.
+
+### Validation
+- Backend: 21 pytest tests passed (`tests/test_synth.py` included); Ruff check passed with 0 errors.
+- Frontend: ESLint passed with 0 errors.
+- Population checks: ~35.0% thin-file, ~20.0% women-led, ~60.0% NTN, ~10.0% default rate, 100% balance reconciliation.
+
+## [SME-Credit2.0] — 2026-10-09 (Fixes)
 
 ### Fixed
 - Business.is_synthetic now exists in the SQLAlchemy model, create/read schemas and ERD.
@@ -18,7 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - The uploaded source contains 17 original tests, not the 40 tests in the local
   terminal transcript. Local-only tests and duplicate files were not supplied.
 
-## [Unreleased] — 2026-10-09
+## [SME-Credit2.0] — 2026-10-09
 
 ### Added
 - Sixteen SQLAlchemy credit-domain records, integer PKR constraints, canonical enums,
