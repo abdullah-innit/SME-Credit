@@ -5,6 +5,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased] — 2026-10-10
 
+### Added — Path to Approval counterfactuals (2026-10-10)
+- Added bounded, actionability-checked plans with consistent derived features, real model and policy verification, bilingual steps, timelines and persisted results.
+- Added fast what-if and lender-view API responses with before/after reasons and policy checks.
+- Evaluated all 600 holdout applications: 485 of 522 referred or declined cases found a plan (92.9%); all 1,452 returned plans reapplied as APPROVE.
 ### Added — Scoring pipeline and policy decision API (2026-10-10)
 - Added application submission, idempotent scoring, versioned and reloadable policy checks, recommended offers, expected loss and bank assurance responses.
 - Persisted score, system recommendation and audit records; exposed stable failure codes and documented synthetic-data and integrity-hook limits in docs/POLICY.md.
