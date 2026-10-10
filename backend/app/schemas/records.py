@@ -223,6 +223,8 @@ class AiCallLogCreate(Contract):
     output_hash: Hash | None = None
     duration_ms: Count = 0
     prompt_version: Text
+    tokens: Count = 0
+    cost_usd: float = 0.0
 
 
 class AiCallLogRead(AiCallLogCreate, ReadContract):

@@ -85,6 +85,12 @@ def ingest_statement(
         app = session.get(Application, application_id)
         if app is None:
             raise LookupError("Application not found")
+
+        from app.db.models import ConsentRecord
+        consent = session.get(ConsentRecord, app.consent_id)
+        if not consent or consent.revoked_at is not None:
+            raise PermissionError("Active consent is required before processing statements")
+
         digest = hashlib.sha256(raw).hexdigest()
         existing = session.scalar(
             select(Document)

@@ -12,10 +12,15 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # ── LLM ──────────────────────────────────────────────────────────
-    LLM_PROVIDER: str = "openai"
+    LLM_PROVIDER: str = "anthropic"
     LLM_API_KEY: str = ""
-    LLM_MODEL: str = "gpt-4o-mini"
+    LLM_MODEL: str = "claude-3-5-sonnet-20241022"
+    LLM_BASE_URL: str = ""
+    LLM_TIMEOUT_SECONDS: float = 30.0
+    LLM_MAX_RETRIES: int = 1
+    LLM_RATE_LIMIT_RPM: int = 60
     OFFLINE_MODE: bool = True  # Default True so app works without API keys
+    EMBEDDINGS_ENABLED: bool = False
 
     # ── Statement ingestion ─
     MAX_STATEMENT_BYTES: int = 10_000_000
@@ -23,6 +28,7 @@ class Settings(BaseSettings):
 
     # ── Database ─────────────────────────────────────────────────────
     DATABASE_URL: str = "sqlite:///./sme_credit.db"
+    DATA_RETENTION_DAYS: int = 1825
 
     # ── Auth ─────────────────────────────────────────────────────────
     JWT_SECRET: str = "change-me-in-production"
@@ -36,6 +42,7 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "env_file_encoding": "utf-8",
         "case_sensitive": True,
+        "extra": "ignore",
     }
 
 

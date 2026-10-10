@@ -1,10 +1,11 @@
 """Application submission and typed scoring response."""
 
 from datetime import UTC, datetime
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import enums
@@ -58,7 +59,8 @@ class Assurance(BaseModel):
 
 class IntegrityHook(BaseModel):
     status: str
-    flags: list[str]
+    integrity_score: int | None = None
+    flags: list[dict[str, Any]] = []
     application_id: int
 
 
@@ -127,3 +129,35 @@ def score(application_id: int) -> ScoringOutput:
         raise HTTPException(404, str(exc)) from exc
     except FileNotFoundError as exc:
         raise HTTPException(503, str(exc)) from exc
+
+
+@router.get("/applications/{application_id}/integrity")
+def get_integrity(application_id: int, session: Annotated[Session, Depends(get_db)]) -> dict:
+    from app.db.models import FraudFlag, IntegrityResult
+
+    result = session.scalars(
+        select(IntegrityResult).where(IntegrityResult.application_id == application_id)
+    ).first()
+    if not result:
+        raise HTTPException(404, "Integrity result not found")
+
+    flags = session.scalars(
+        select(FraudFlag).where(FraudFlag.integrity_result_id == result.id)
+    ).all()
+
+    return {
+        "id": result.id,
+        "application_id": result.application_id,
+        "severity": result.severity.value,
+        "code": result.code,
+        "evidence": result.evidence,
+        "flags": [
+            {
+                "id": f.id,
+                "severity": f.severity.value,
+                "code": f.code,
+                "evidence": f.evidence,
+            }
+            for f in flags
+        ],
+    }

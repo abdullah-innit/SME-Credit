@@ -50,6 +50,21 @@ def init_db(bind: Engine = engine, *, seed_hook: Callable[[Session], None] | Non
     from app.db import models  # noqa: F401 — register every table
 
     Base.metadata.create_all(bind)
+    if bind.dialect.name == "sqlite":
+        with bind.connect() as conn:
+            cursor = conn.connection.cursor()
+            cols = [r[1] for r in cursor.execute("PRAGMA table_info(ai_call_logs)").fetchall()]
+            if cols:
+                if "tokens" not in cols:
+                    cursor.execute(
+                        "ALTER TABLE ai_call_logs ADD COLUMN tokens INTEGER DEFAULT 0 NOT NULL"
+                    )
+                if "cost_usd" not in cols:
+                    cursor.execute(
+                        "ALTER TABLE ai_call_logs ADD COLUMN cost_usd REAL DEFAULT 0.0 NOT NULL"
+                    )
+                conn.connection.commit()
+            cursor.close()
     if seed_hook is not None:
         with Session(bind) as session, session.begin():
             seed_hook(session)

@@ -5,6 +5,40 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased] — 2026-10-10
 
+### Added — Policy-grounded advisor with tools (2026-10-10)
+- Added original illustrative policy knowledge base (backend/app/knowledge/documents/) with 21 markdown chunks covering eligibility (KB-ELIG-001 to 003), required documents (KB-DOCS-001 to 002), product terms (KB-TERM-001 to 003), scoring methodology (KB-SCOR-001 to 003), Path to Approval score improvement (KB-IMPR-001 to 003), FAQs (KB-FAQS-001 to 003), repayment tips (KB-REPAY-001 to 003), and a responsible lending charter (KB-RESP-001). All clearly labeled illustrative.
+- Added native BM25 (Okapi) keyword retrieval index (backend/app/knowledge/retrieval.py) with multilingual tokenization for English and Urdu / Arabic script, plus an optional vector embeddings provider toggled via settings.EMBEDDINGS_ENABLED.
+- Implemented two grounded personas in backend/app/services/advisor.py:
+  - **Applicant Assistant**: English and Urdu (اردو/Roman Urdu), strictly isolated to the applicant's own facts bundle.
+  - **Officer Copilot**: Underwriter copilot for policy questions, referral analysis ('why was this referred'), side-by-side application comparison, and tailored covenant/condition list drafting.
+- Added structured tool calling (backend/app/services/advisor_tools.py): get_application_summary, run_what_if (integrating Prompt 8 counterfactual engine), explain_reason, and search_policy. Responses emit tool_calls: list[ToolCallRecord] so the UI can render 'AI used a tool' chips.
+- Added hard safety guardrails: the assistant can NEVER approve, decline, or promise a loan; polite refusals for approval guarantees and out-of-scope queries (recipes, weather, crypto, trivia).
+- Enforced strict tenant authorization: applicants cannot read other applicants' data, returning polite 403 authorization refusals.
+- Added Server-Sent Events (SSE) streaming endpoint (POST /api/v1/advisor/chat/stream), session-scoped conversation memory with turn history and clear endpoints, and PII-safe logging masking CNICs, phone numbers, card numbers, IBANs, and API keys.
+- Added deterministic offline mode ensuring full functionality without external API keys.
+- Added 14 acceptance tests in backend/tests/test_advisor.py covering tool routing, chip payloads, refusals, citations, applicant tenant isolation, officer workflows, Urdu bilingual output, SSE streaming, session memory, and PII masking.
+
+### Added — AI credit memo and plain-language explanations (2026-10-10)
+- Added bank-facing credit memo generation service (`backend/app/services/memo.py`) covering 8 required sections: executive summary, business snapshot, cash-flow analysis, key risk drivers (feature waterfall), integrity findings, policy checks, recommendation & conditions, and questions for applicant interview.
+- Grounded memo metrics directly in the facts bundle (score, PD, tier, features, reasons, policy checks, data-quality score) with Prompt 10 number checking enforced; cited fact IDs as structured footnotes.
+- Added mandatory banner label `'AI-assisted draft — officer review required'` on all generated memos.
+- Added applicant-facing explanations in plain English, Urdu (اردو), and Roman Urdu at Grade 6–8 reading level, with respectful tone, adverse-action reasons for decline/referral, and Path to Approval summaries.
+- Added officer editing with versioning in `MemoRecord`, tracking author, timestamps, `'Human-edited — officer reviewed'` label, and unified diff between versions.
+- Added on-demand regeneration supporting `concise` and `detailed` tone options.
+- Added print-optimised HTML export with responsive styling and RTL Urdu support (`Noto Nastaliq Urdu` / fallback fonts), and PDF export via ReportLab.
+- Added REST routes in `backend/app/api/v1/memo.py` (`/api/v1/applications/{id}/memo`, `/versions`, `/export/html`, `/export/pdf`, `/api/v1/applications/{id}/explanation/applicant`).
+- Added comprehensive test suite (`backend/tests/test_memo.py`) verifying under-10-second latency, zero ungrounded numbers, plain-language Urdu/Roman Urdu content, officer edits with unified diffs, and HTML/PDF exports.
+
+### Added — LLM service layer with safety guardrails (2026-10-10)
+- Added single safe, testable gateway (`backend/app/llm/gateway.py`) with Anthropic as default provider (`claude-3-5-sonnet-20241022`), pluggable OpenAI-compatible provider, and MockProvider for deterministic testing.
+- Added structured Pydantic schemas (`CreditMemoOutput`, `StatementExtractionOutput`, `AdvisorOutput`) with automatic repair retry on invalid JSON and typed exception hierarchy.
+- Versioned prompts in `app/llm/prompts/` with SHA-256 registry; shared system prompt strictly enforcing non-negotiable rules: never decide credit outcomes, never invent numbers, cite fact IDs, refuse unrelated requests.
+- Added number-grounding verification (`app/llm/grounding.py`) ensuring every numeric value in generated responses originates in the facts bundle or whitelisted arithmetic; failures trigger regeneration before falling back to deterministic safe fallback.
+- Added prompt-injection sanitisation (`app/llm/sanitise.py`) stripping control phrases from free-text and CSV data, and masking API keys.
+- Added SQLite-backed caching keyed by SHA-256 of prompt and facts bundle, exponential backoff, sliding-window rate limiting, and execution logging to `AiCallLog` (latency, tokens, estimated cost in USD).
+- Added endpoints `GET /api/v1/admin/ai-usage`, `GET /api/v1/admin/ai-health`, and `GET /api/v1/health/llm`.
+- Added 11 acceptance tests in `backend/tests/test_llm.py` covering success, repair retry, number-checker failure, timeout fallback, prompt-injection hygiene, offline mode, and API key masking.
+
 ### Added — Statement ingestion and transaction categorisation (2026-10-10)
 - Added CSV, XLSX and text-PDF adapters, validated generic column mapping, optional Prompt 10 LLM hooks, privacy-safe normalisation, rule-first category confidence and duplicate detection.
 - Added upload, status and synthetic sample endpoints with a 10 MB allow-list and stage reports.

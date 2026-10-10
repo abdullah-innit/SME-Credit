@@ -19,6 +19,7 @@ from app.db.models import Application, AuditLog, Business, Decision, Document, S
 from app.db.session import SessionLocal
 from app.ml.explain import explain_values
 from app.ml.features import compute_features
+from app.ml.integrity import evaluate_integrity
 from app.ml.scorecard import ARTIFACTS, calibrated_probability, load_model, pd_to_score, tier_for_pd
 from app.services.policy import evaluate_policy, load_policy
 
@@ -35,11 +36,6 @@ def warm_models() -> None:
     _, challenger, metadata = _models()
     vector = np.zeros((1, len(metadata["feature_list"])), dtype=float)
     calibrated_probability(challenger, vector)
-
-
-def integrity_hook(application_id: int) -> dict:
-    """Prompt 13 replaces this with evidence-backed integrity screening."""
-    return {"status": "pending", "flags": [], "application_id": application_id}
 
 
 def _documents(session: Session, business_id: int) -> list[Document]:
@@ -200,9 +196,24 @@ def score_application(
             "REFER": enums.Outcome.REFER,
             "DECLINE": enums.Outcome.REJECT,
         }
+
+        integrity_res = evaluate_integrity(application_id, session=session)
+        flags = integrity_res.get("flags", [])
+        has_high = any(f["severity"] == enums.Severity.HIGH for f in flags)
+        has_medium = any(f["severity"] == enums.Severity.MEDIUM for f in flags)
+
+        final_outcome_str = result.outcome
+        checks = [asdict(c) for c in result.checks]
+        failed = [c["code"] for c in checks if c["status"] == "fail"]
+
+        if has_high:
+            if final_outcome_str == "APPROVE":
+                final_outcome_str = "REFER"
+            failed.append("INTEGRITY_HIGH_RISK")
+
         decision = Decision(
             application_id=application_id,
-            outcome=mapped[result.outcome],
+            outcome=mapped[final_outcome_str],
             amount=result.recommended_amount_pkr,
             tenor=result.tenor_months,
             rate_band=result.indicative_rate_band,
@@ -212,18 +223,23 @@ def score_application(
         )
         session.add(decision)
         session.flush()
-        checks = [asdict(c) for c in result.checks]
-        failed = [c["code"] for c in checks if c["status"] == "fail"]
+
+        dq = _data_quality(values, documents)
+        confidence = "limited: synthetic-data calibration"
+        if has_medium:
+            dq["completeness"] = round(dq["completeness"] * 0.8, 2)
+            confidence += " (reduced by integrity flags)"
+
         assurance = {
             "calibration_method": champion["method"],
             "test_brier_score": metadata["metrics"]["models"][metadata["champion"]]["test"]["all"][
                 "brier"
             ],
-            "confidence": "limited: synthetic-data calibration",
+            "confidence": confidence,
             "model_agreement": abs(pd - challenger_pd)
             <= policy["maximum_champion_challenger_pd_gap"],
             "pd_gap": round(abs(pd - challenger_pd), 4),
-            "data_quality": _data_quality(values, documents),
+            "data_quality": dq,
             "policy_summary": {
                 state: sum(c["status"] == state for c in checks)
                 for state in ("pass", "fail", "warn")
@@ -241,7 +257,7 @@ def score_application(
             "challenger_pd": challenger_pd,
             "score": score,
             "tier": tier,
-            "outcome": result.outcome,
+            "outcome": final_outcome_str,
             "reason_codes": failed,
             "policy_checks": checks,
             "offer": {
@@ -250,7 +266,7 @@ def score_application(
                 "indicative_rate_band": result.indicative_rate_band,
                 "expected_loss_pkr": result.expected_loss_pkr,
             },
-            "integrity": integrity_hook(application_id),
+            "integrity": integrity_res,
             "assurance": assurance,
         }
         session.add(

@@ -76,9 +76,7 @@ END_DATE = date(2026, 9, 30)
 TOTAL_DAYS = (END_DATE - START_DATE).days + 1  # 730 days
 
 # Precomputed deterministic counterparty hashes
-_HASH_POOL = [
-    hashlib.sha256(f"counterparty_seed_{i}".encode()).hexdigest() for i in range(2000)
-]
+_HASH_POOL = [hashlib.sha256(f"counterparty_seed_{i}".encode()).hexdigest() for i in range(2000)]
 
 # ---------------------------------------------------------------------------
 # Business Persona Definitions (Fixed IDs 1, 2, 3)
@@ -250,9 +248,7 @@ class SyntheticDataGenerator:
         has_ntn[3:] = self.rng.uniform(0, 1, n - 3) < 0.60
 
         # Sectors
-        chosen_sectors = self.rng.choice(
-            SECTORS, size=n - 3, p=SECTOR_WEIGHTS
-        ).tolist()
+        chosen_sectors = self.rng.choice(SECTORS, size=n - 3, p=SECTOR_WEIGHTS).tolist()
         sectors = [
             PERSONA_1_AYESHA["sector"],
             PERSONA_2_KARIM["sector"],
@@ -293,14 +289,11 @@ class SyntheticDataGenerator:
 
         # Employees: 1-60 (skewed distribution)
         raw_emp = self.rng.exponential(scale=7.0, size=n - 3) + 1.0
-        emp_list = (
-            [
-                PERSONA_1_AYESHA["employees"],
-                PERSONA_2_KARIM["employees"],
-                PERSONA_3_FASTFIX["employees"],
-            ]
-            + np.clip(raw_emp.astype(int), 1, 60).tolist()
-        )
+        emp_list = [
+            PERSONA_1_AYESHA["employees"],
+            PERSONA_2_KARIM["employees"],
+            PERSONA_3_FASTFIX["employees"],
+        ] + np.clip(raw_emp.astype(int), 1, 60).tolist()
 
         # Injected Fraud: 3-5%
         is_synthetic_fraud = np.zeros(n, dtype=int)
@@ -318,12 +311,7 @@ class SyntheticDataGenerator:
         # Default Outcome: 12-month default rate 8-12%, AUC 0.75-0.85
         # Causal equation: gender and age have strict 0.0 causal weight
         noise = self.rng.normal(0, 0.85, n)
-        z = (
-            -3.08
-            - 1.55 * latent_health
-            + 1.25 * is_synthetic_fraud.astype(float)
-            + noise
-        )
+        z = -3.08 - 1.55 * latent_health + 1.25 * is_synthetic_fraud.astype(float) + noise
         p_default = expit(z)
         default_12m = (p_default > self.rng.uniform(0, 1, n)).astype(int)
 
@@ -404,7 +392,7 @@ class SyntheticDataGenerator:
         for i in range(3, n):
             s = surnames[i % len(surnames)]
             suff = biz_suffixes[(i * 7 + 3) % len(biz_suffixes)]
-            business_names.append(f"{s} {suff} {i+1}")
+            business_names.append(f"{s} {suff} {i + 1}")
 
         # Collateral value (PKR)
         collateral_values = np.zeros(n, dtype=int)
@@ -421,9 +409,7 @@ class SyntheticDataGenerator:
                 )
             else:
                 collateral_values[i] = int(
-                    self.rng.choice(
-                        [1000000, 1500000, 2000000, 3000000, 5000000, 8000000]
-                    )
+                    self.rng.choice([1000000, 1500000, 2000000, 3000000, 5000000, 8000000])
                 )
 
         return {
@@ -632,9 +618,7 @@ class SyntheticDataGenerator:
             )
 
             # Primary Document (Bank Statement)
-            statement_sha = hashlib.sha256(
-                f"statement_biz_{biz_id}".encode()
-            ).hexdigest()
+            statement_sha = hashlib.sha256(f"statement_biz_{biz_id}".encode()).hexdigest()
             doc_id = doc_id_counter
             doc_id_counter += 1
 
@@ -927,11 +911,7 @@ class SyntheticDataGenerator:
                         is_outflow = True
                         category = "payroll"
                         channel = enums.Channel.BANK
-                        amount = int(
-                            np.clip(
-                                (25000 + 5000 * (h > 0)) * emp / 4.0, 10000, 1000000
-                            )
-                        )
+                        amount = int(np.clip((25000 + 5000 * (h > 0)) * emp / 4.0, 10000, 1000000))
                     elif is_mid_month and day_idx % 2 == 1:
                         is_outflow = True
                         category = "utility_bill"
@@ -1378,11 +1358,7 @@ class SyntheticDataGenerator:
             "12 TL",
         ]
         for line_item in lines:
-            escaped = (
-                line_item.replace("\\", "\\\\")
-                .replace("(", "\\(")
-                .replace(")", "\\)")
-            )
+            escaped = line_item.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
             stream_cmds.append(f"({escaped}) Tj")
             stream_cmds.append("T*")
         stream_cmds.append("ET")
@@ -1397,9 +1373,7 @@ class SyntheticDataGenerator:
             b"3 0 obj\n<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> "
             b"/MediaBox [0 0 612 792] /Contents 5 0 R >>\nendobj\n"
         )
-        objects.append(
-            b"4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>\nendobj\n"
-        )
+        objects.append(b"4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>\nendobj\n")
         objects.append(
             f"5 0 obj\n<< /Length {len(stream_bytes)} >>\nstream\n".encode("latin-1")
             + stream_bytes

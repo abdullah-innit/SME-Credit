@@ -498,6 +498,8 @@ class AiCallLog(TimestampMixin, Base):
     output_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     duration_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     prompt_version: Mapped[str] = mapped_column(String(1024), nullable=False)
+    tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    cost_usd: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     __table_args__ = (
         CheckConstraint(
             "length(input_hash) = 64 AND input_hash NOT GLOB '*[^0-9a-f]*'",
@@ -541,6 +543,25 @@ class AuditLog(TimestampMixin, Base):
 @event.listens_for(AuditLog, "before_delete")
 def prevent_audit_mutation(mapper: Any, connection: Any, target: AuditLog) -> None:
     raise ValueError("Audit records are append-only through the ORM")
+
+
+class Appeal(TimestampMixin, Base):
+    __tablename__ = "appeals"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    application_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("applications.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    applicant_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    reason: Mapped[str] = mapped_column(String(1024), nullable=False)
+    status: Mapped[enums.AppealStatus] = mapped_column(
+        enum_type(enums.AppealStatus), nullable=False, default=enums.AppealStatus.PENDING
+    )
+    officer_task_created: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    application: Mapped[Application] = relationship(foreign_keys=[application_id])
+    applicant: Mapped[User] = relationship(foreign_keys=[applicant_id])
 
 
 @event.listens_for(Base, "before_insert", propagate=True)

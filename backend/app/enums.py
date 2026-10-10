@@ -122,5 +122,11 @@ class AiCallStatus(StrEnum):
     OFFLINE = "offline"
 
 
+class AppealStatus(StrEnum):
+    PENDING = "pending"
+    IN_REVIEW = "in_review"
+    RESOLVED = "resolved"
+
+
 # Older callers may use this name; this is the same enum, not a second definition.
 OwnerAgeBand = AgeBand

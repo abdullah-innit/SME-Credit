@@ -1,9 +1,12 @@
 """Health-check endpoint."""
 
+from typing import Any
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from app.core.config import settings
+from app.llm.gateway import get_health_info
 
 router = APIRouter(tags=["health"])
 
@@ -24,3 +27,9 @@ async def health_check() -> HealthResponse:
         version=settings.APP_VERSION,
         offline_mode=settings.OFFLINE_MODE,
     )
+
+
+@router.get("/health/llm")
+async def llm_health_check() -> dict[str, Any]:
+    """Return LLM service layer health info (provider, mode, and last success)."""
+    return get_health_info()

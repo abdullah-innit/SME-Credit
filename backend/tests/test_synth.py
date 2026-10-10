@@ -21,10 +21,7 @@ def synth_data(tmp_path_factory):
 
     generator = SyntheticDataGenerator(n=300, seed=42)
     summary = generator.generate_all(
-        db_path=db_path,
-        data_dir=data_dir,
-        samples_dir=samples_dir,
-        quiet=True
+        db_path=db_path, data_dir=data_dir, samples_dir=samples_dir, quiet=True
     )
 
     return {
@@ -32,7 +29,7 @@ def synth_data(tmp_path_factory):
         "db_path": db_path,
         "data_dir": data_dir,
         "samples_dir": samples_dir,
-        "generator": generator
+        "generator": generator,
     }
 
 
@@ -103,7 +100,7 @@ def test_label_leakage_and_schema_isolation(synth_data):
     assert len(np.unique(y)) == 2, "Need both defaults and non-defaults for AUC test"
 
     # Encode categorical features
-    encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
     X_cat_encoded = encoder.fit_transform(X_cat)
 
     # Combine features

@@ -1,0 +1,26 @@
+You are generating a structured credit memo for an SME loan application.
+
+The scoring model has already produced a recommendation. Your job is to EXPLAIN and SUMMARISE — not to override or change the recommendation.
+
+## Input Data
+- Business profile and application details are provided in the FACTS section below.
+- The model's score, recommendation, and top risk factors are provided.
+
+## Output Requirements
+Produce a JSON object with exactly this structure:
+{
+  "summary_en": "English executive summary (2-4 sentences)",
+  "summary_ur": "Urdu executive summary (2-4 sentences)",
+  "strengths": ["strength 1", "strength 2", ...],
+  "weaknesses": ["weakness 1", "weakness 2", ...],
+  "recommendation_rationale": "Why the model/policy reached this recommendation",
+  "fact_ids_cited": ["fact_id_1", "fact_id_2", ...]
+}
+
+## FACTS
+{facts}
+
+## APPLICATION CONTEXT
+{context}
+
+Respond with ONLY the JSON object. No markdown, no explanation outside the JSON.

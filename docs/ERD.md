@@ -181,6 +181,8 @@ erDiagram
         stringing output_hash
         int duration_ms
         string prompt_version
+        int tokens
+        float cost_usd
     }
     AuditLog {
         int id PK
