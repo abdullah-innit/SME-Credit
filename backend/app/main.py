@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.logging import logger
 from app.db.session import init_db
 from app.services.pipeline import warm_models
+import os
 
 
 @asynccontextmanager
@@ -34,6 +35,14 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
+    init_db()
+    try:
+        warm_models()
+    except (FileNotFoundError, ValueError) as exc:
+        logger.warning("Scoring artifacts unavailable: %s", exc)
+
 
 # ── CORS ─────────────────────────────────────────────────────────────
 app.add_middleware(
